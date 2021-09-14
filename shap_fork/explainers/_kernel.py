@@ -13,6 +13,7 @@ import warnings
 from sklearn.linear_model import LassoLarsIC, Lasso, lars_path
 from tqdm.auto import tqdm
 from ._explainer import Explainer
+import torch
 
 log = logging.getLogger('shap')
 
@@ -69,8 +70,6 @@ class Kernel(Explainer):
         model_null = match_model_to_data(self.model, self.data)
 
         # enforce our current input type limitations
-        assert isinstance(self.data, DenseData) or isinstance(self.data, SparseData), \
-               "Shap explainer only supports the DenseData and SparseData input currently."
         assert not self.data.transposed, "Shap explainer does not support transposed DenseData or SparseData currently."
 
         # warn users about large background data sets
@@ -90,7 +89,11 @@ class Kernel(Explainer):
         if isinstance(model_null, (pd.DataFrame, pd.Series)):
             model_null = np.squeeze(model_null.values)
         if safe_isinstance(model_null, "tensorflow.python.framework.ops.EagerTensor"):
-            model_null = model_null.numpy()
+            print('im here bro')
+            model_null = model_null.detach().numpy()
+
+        model_null = model_null.detach().numpy()
+
         self.fnull = np.sum((model_null.T * self.data.weights).T, 0)
         self.expected_value = self.linkfv(self.fnull)
 
@@ -152,7 +155,6 @@ class Kernel(Explainer):
         # if sparse, convert to lil for performance
         if sp.sparse.issparse(X) and not sp.sparse.isspmatrix_lil(X):
             X = X.tolil()
-        assert x_type.endswith(arr_type) or sp.sparse.isspmatrix_lil(X), "Unknown instance type: " + x_type
         assert len(X.shape) == 1 or len(X.shape) == 2, "Instance must have 1 or 2 dimensions!"
 
         # single instance
@@ -179,7 +181,7 @@ class Kernel(Explainer):
         # explain the whole dataset
         elif len(X.shape) == 2:
             explanations = []
-            for i in tqdm(range(X.shape[0]), disable=kwargs.get("silent", False)):
+            for i in range(X.shape[0]):
                 data = X[i:i + 1, :]
                 if self.keep_index:
                     data = convert_to_instance_with_index(data, column_name, index_value[i:i + 1], index_name)
@@ -406,6 +408,9 @@ class Kernel(Explainer):
                         varying[i] = False
                         continue
                     x_group = x_group.todense()
+
+                if isinstance(self.data.data, torch.Tensor):
+                    self.data.data = self.data.data.numpy()
                 num_mismatches = np.sum(np.frompyfunc(self.not_equal, 2, 1)(x_group, self.data.data[:, inds]))
                 varying[i] = num_mismatches > 0
             varying_indices = np.nonzero(varying)[0]
@@ -513,7 +518,7 @@ class Kernel(Explainer):
         modelOut = self.model.f(data)
         if isinstance(modelOut, (pd.DataFrame, pd.Series)):
             modelOut = modelOut.values
-        self.y[self.nsamplesRun * self.N:self.nsamplesAdded * self.N, :] = np.reshape(modelOut, (num_to_run, self.D))
+        self.y[self.nsamplesRun * self.N:self.nsamplesAdded * self.N, :] = np.reshape(modelOut.detach().numpy(), (num_to_run, self.D))
 
         # find the expected value of each output
         for i in range(self.nsamplesRun, self.nsamplesAdded):
@@ -541,6 +546,9 @@ class Kernel(Explainer):
             log.info("np.sum(w_aug) = {0}".format(np.sum(w_aug)))
             log.info("np.sum(self.kernelWeights) = {0}".format(np.sum(self.kernelWeights)))
             w_sqrt_aug = np.sqrt(w_aug)
+
+            if isinstance(self.fx[dim], torch.Tensor):
+                self.fx = self.fx.detach().numpy()
             eyAdj_aug = np.hstack((eyAdj, eyAdj - (self.link.f(self.fx[dim]) - self.link.f(self.fnull[dim]))))
             eyAdj_aug *= w_sqrt_aug
             mask_aug = np.transpose(w_sqrt_aug * np.transpose(np.vstack((self.maskMatrix, self.maskMatrix - 1))))
