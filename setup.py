@@ -113,7 +113,7 @@ def compile_cuda_module(host_args):
                  "-gencode=arch=compute_70,code=sm_70 " + \
                  "-gencode=arch=compute_75,code=sm_75 " + \
                  "-gencode=arch=compute_75,code=compute_75"
-    nvcc_command = "shap/cext/_cext_gpu.cu -lib -o {} -Xcompiler {} -I{} " \
+    nvcc_command = "shap_fork/cext/_cext_gpu.cu -lib -o {} -Xcompiler {} -I{} " \
                    "--std c++14 " \
                    "--expt-extended-lambda " \
                    "--expt-relaxed-constexpr {}".format(
@@ -137,7 +137,7 @@ def run_setup(with_binary, test_xgboost, test_lightgbm, test_catboost, test_spar
             compile_args.append('/MD')
 
         ext_modules.append(
-            Extension('shap._cext', sources=['shap/cext/_cext.cc'],
+            Extension('shap_fork._cext', sources=['shap_fork/cext/_cext.cc'],
                       extra_compile_args=compile_args))
     if with_cuda:
         try:
@@ -151,11 +151,11 @@ def run_setup(with_binary, test_xgboost, test_lightgbm, test_catboost, test_spar
             lib_dir, lib = compile_cuda_module(compile_args)
 
             ext_modules.append(
-                Extension('shap._cext_gpu', sources=['shap/cext/_cext_gpu.cc'],
+                Extension('shap._cext_gpu', sources=['shap_fork/cext/_cext_gpu.cc'],
                           extra_compile_args=compile_args,
                           library_dirs=[lib_dir, cudart_path],
                           libraries=[lib, 'cudart'],
-                          depends=['shap/cext/_cext_gpu.cu', 'shap/cext/gpu_treeshap.h','setup.py'])
+                          depends=['shap_fork/cext/_cext_gpu.cu', 'shap_fork/cext/gpu_treeshap.h','setup.py'])
             )
         except Exception as e:
             raise Exception("Error building cuda module: " + repr(e))
@@ -201,8 +201,8 @@ def run_setup(with_binary, test_xgboost, test_lightgbm, test_catboost, test_spar
     extras_require['all'] = list(set(i for val in extras_require.values() for i in val))
 
     setup(
-        name='shap',
-        version=find_version("shap", "__init__.py"),
+        name='shap_fork',
+        version=find_version("shap_fork", "__init__.py"),
         description='A unified approach to explain the output of any machine learning model.',
         long_description="SHAP (SHapley Additive exPlanations) is a unified approach to explain "
                          "the output of " + \
@@ -212,7 +212,7 @@ def run_setup(with_binary, test_xgboost, test_lightgbm, test_catboost, test_spar
                          "and locally accurate " + \
                          "additive feature attribution method based on expectations.",
         long_description_content_type="text/markdown",
-        url='http://github.com/slundberg/shap',
+        url='http://github.com/greggyfromtheblock/shap_fork',
         author='Scott Lundberg',
         author_email='slund1@cs.washington.edu',
         license='MIT',
