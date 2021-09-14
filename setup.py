@@ -217,11 +217,11 @@ def run_setup(with_binary, test_xgboost, test_lightgbm, test_catboost, test_spar
         author_email='slund1@cs.washington.edu',
         license='MIT',
         packages=[
-            'shap', 'shap.explainers', 'shap.explainers.other', 'shap.explainers._deep',
-            'shap.plots', 'shap.plots.colors', 'shap.benchmark', 'shap.maskers', 'shap.utils',
-            'shap.actions', 'shap.models'
+            'shap_fork', 'shap_fork.explainers', 'shap_fork.explainers.other', 'shap_fork.explainers._deep',
+            'shap_fork.plots', 'shap_fork.plots.colors', 'shap_fork.benchmark', 'shap_fork.maskers', 'shap_fork.utils',
+            'shap_fork.actions', 'shap_fork.models'
         ],
-        package_data={'shap': ['plots/resources/*', 'cext/tree_shap.h']},
+        package_data={'shap_fork': ['plots/resources/*', 'cext/tree_shap.h']},
         cmdclass={'build_ext': build_ext},
         setup_requires=['numpy'],
         install_requires=['numpy', 'scipy', 'scikit-learn', 'pandas', 'tqdm>4.25.0',
