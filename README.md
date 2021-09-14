@@ -1,3 +1,41 @@
+## Hi there :)
+
+This is a fork from github.com/slundberg/master, the only thing changed from the package is on the KernelExplainer class, now it supports inputs of type <Torch.Tensor>. Everything else in the package should remain the same. 
+
+## Install
+
+<pre>
+pip install git+https://github.com/greggyfromtheblock/shap_fork.git
+</pre>
+
+## Importing package
+
+```python
+import shap_fork as shap
+```
+
+## Kernel Explainer
+
+First you need to wrap the forward pass of your model like this
+
+```python
+def forward(inputs):
+  inputs = torch.Tensor(inputs)
+  out = self.net(inputs)
+  out
+```
+
+Then you need to put the baseline, this can also be as a tensor
+
+```python
+  baseline = torch.zeros(1, train_data.shape[1])
+```
+
+Finally, get the shap values with calling numpy() on your input tensor
+```python
+  shap_values = explainer.shap_values(valid_data.numpy())
+```
+
 
 
 <p align="center">
@@ -14,15 +52,10 @@
 <!--**SHAP (SHapley Additive exPlanations)** is a unified approach to explain the output of any machine learning model. SHAP connects game theory with local explanations, uniting several previous methods [1-7] and representing the only possible consistent and locally accurate additive feature attribution method based on expectations (see our [papers](#citations) for details and citations).-->
 
 
-
 ## Install
 
-SHAP can be installed from either [PyPI](https://pypi.org/project/shap) or [conda-forge](https://anaconda.org/conda-forge/shap):
-
 <pre>
-pip install shap
-<i>or</i>
-conda install -c conda-forge shap
+pip install git+https://github.com/greggyfromtheblock/shap_fork.git
 </pre>
 
 ## Tree ensemble example (XGBoost/LightGBM/CatBoost/scikit-learn/pyspark models)
