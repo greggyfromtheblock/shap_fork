@@ -1,7 +1,7 @@
 import numpy as np
-from shap.utils import MaskedModel
-from shap import links
-from shap.models import Model
+from shap_fork.utils import MaskedModel
+from shap_fork import links
+from shap_fork.models import Model
 from .._explainer import Explainer
 
 class Random(Explainer):
