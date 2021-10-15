@@ -573,7 +573,7 @@ class Kernel(Explainer):
 
         # eliminate one variable with the constraint that all features sum to the output
         eyAdj2 = eyAdj - self.maskMatrix[:, nonzero_inds[-1]] * (
-                    self.link.f(self.fx[dim]) - self.link.f(self.fnull[dim]))
+                    self.link.f(self.fx[dim].detach().numpy()) - self.link.f(self.fnull[dim]))
         etmp = np.transpose(np.transpose(self.maskMatrix[:, nonzero_inds[:-1]]) - self.maskMatrix[:, nonzero_inds[-1]])
         log.debug("etmp[:4,:] {0}".format(etmp[:4, :]))
 
