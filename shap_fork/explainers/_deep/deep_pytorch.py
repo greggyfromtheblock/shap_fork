@@ -398,3 +398,7 @@ op_handler['SELU'] = nonlinear_1d
 op_handler['MaxPool1d'] = maxpool
 op_handler['MaxPool2d'] = maxpool
 op_handler['MaxPool3d'] = maxpool
+
+op_handler['LayerNorm'] = linear_1d
+
+
